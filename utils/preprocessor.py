@@ -20,8 +20,10 @@ class Preprocessor(L.LightningDataModule):
         self.tokenizer = AutoTokenizer.from_pretrained("indolem/indobert-base-uncased")
         self.batch_size = batch_size
         
+        self.kaggle_folder = "ferdi_indo_hoax"
+        
     def load_data(self):
-        dataset = pd.read_csv("datasets/turnbackhoax_data.csv")
+        dataset = pd.read_csv(f"{self.kaggle_folder}/datasets/turnbackhoax_data.csv")
         dataset = dataset[["title", "label", "narasi", "counter"]]
         
         return dataset
@@ -29,9 +31,9 @@ class Preprocessor(L.LightningDataModule):
     def preprocessor(self):
         dataset = self.load_data()
         
-        if not os.path.exists("datasets/train_set.pt") \
-            and not os.path.exists("datasets/val_set.pt") \
-            and not os.path.exists("datasets/test_set.pt") :
+        if not os.path.exists(f"{self.kaggle_folder}/datasets/train_set.pt") \
+            and not os.path.exists(f"{self.kaggle_folder}/datasets/val_set.pt") \
+            and not os.path.exists(f"{self.kaggle_folder}/datasets/test_set.pt") :
                 
             x_ids, x_att, y = [], [], []
             for _, data in tqdm(dataset.iterrows(), total = dataset.shape[0], desc = "Preprocesing Hoax"):
@@ -91,15 +93,15 @@ class Preprocessor(L.LightningDataModule):
             all_data = TensorDataset(x_ids, x_att, y)
             train_set, val_set, test_set = torch.utils.data.random_split(all_data, [train_len, val_len, test_len])
             
-            torch.save(train_set, "datasets/train_set.pt")
-            torch.save(val_set, "datasets/val_set.pt")
-            torch.save(test_set, "datasets/test_set.pt")
+            torch.save(train_set, f"{self.kaggle_folder}/datasets/train_set.pt")
+            torch.save(val_set, f"{self.kaggle_folder}/datasets/val_set.pt")
+            torch.save(test_set, f"{self.kaggle_folder}/datasets/test_set.pt")
             
         else:
             print("Load Data")
-            train_set = torch.load("datasets/train_set.pt")
-            val_set = torch.load("datasets/val_set.pt")
-            test_set = torch.load("datasets/test_set.pt")
+            train_set = torch.load(f"{self.kaggle_folder}/datasets/train_set.pt")
+            val_set = torch.load(f"{self.kaggle_folder}/datasets/val_set.pt")
+            test_set = torch.load(f"{self.kaggle_folder}/datasets/test_set.pt")
         
         return train_set, val_set, test_set
         
